@@ -5,7 +5,7 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   createEmployeeSchema,
   updateEmployeeSchema,
-  paginationSchema,
+  employeeQuerySchema,
 } from "../middlewares/schemas";
 import { UserRole } from "../types";
 
@@ -13,7 +13,7 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/", validate(paginationSchema, "query"), employeeController.getAll);
+router.get("/", validate(employeeQuerySchema, "query"), employeeController.getAll);
 router.get("/:id", employeeController.getById);
 
 router.post(

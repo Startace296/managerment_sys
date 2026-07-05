@@ -1,19 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { employeeService } from "../services/employee.service";
 import { sendSuccess, sendPaginated } from "../utils/response";
-import { EmployeeStatus } from "../types";
 
 class EmployeeController {
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const filter = {
-        ...req.query,
-        departmentId: req.query.departmentId
-          ? Number(req.query.departmentId)
-          : undefined,
-        status: req.query.status as EmployeeStatus | undefined,
-      };
-      const result = await employeeService.getAll(filter);
+      const result = await employeeService.getAll(req.query);
       sendPaginated(res, result.data, result.total, result.page, result.limit);
     } catch (error) {
       next(error);
