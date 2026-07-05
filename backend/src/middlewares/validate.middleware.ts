@@ -12,7 +12,7 @@ export const validate =
         field: e.path.join("."),
         message: e.message,
       }));
-      return next(new AppError("Validation failed", 422));
+      return next(new AppError("Validation failed", 422, errors));
     }
 
     req[target] = result.data;
