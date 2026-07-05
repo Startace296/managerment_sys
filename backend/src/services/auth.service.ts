@@ -11,7 +11,6 @@ interface RegisterDto {
   password: string;
   firstName: string;
   lastName: string;
-  role?: UserRole;
 }
 
 interface LoginDto {
@@ -45,10 +44,17 @@ class AuthService {
 
     const hashed = await bcrypt.hash(dto.password, env.BCRYPT_ROUNDS);
 
+    // The first account in the system automatically becomes admin; every
+    // account after that is always employee — a higher role can only be
+    // granted by an admin via PATCH /users/:id/role, never from the
+    // client at registration time.
+    const userCount = await userRepository.count();
+    const role = userCount === 0 ? UserRole.ADMIN : UserRole.EMPLOYEE;
+
     const user = userRepository.create({
       ...dto,
       password: hashed,
-      role: dto.role ?? UserRole.EMPLOYEE,
+      role,
     });
 
     await userRepository.save(user);

@@ -36,4 +36,21 @@ export const userRepository = AppDataSource.getRepository(User).extend({
 
     return qb.getManyAndCount();
   },
+
+  findAvailableForEmployee(search?: string) {
+    const qb = this.createQueryBuilder("user")
+      .leftJoin("user.employee", "employee")
+      .where("employee.id IS NULL")
+      .andWhere("user.isActive = true")
+      .orderBy("user.createdAt", "DESC");
+
+    if (search) {
+      qb.andWhere(
+        "(user.email LIKE :search OR user.firstName LIKE :search OR user.lastName LIKE :search)",
+        { search: `%${search}%` }
+      );
+    }
+
+    return qb.getMany();
+  },
 });

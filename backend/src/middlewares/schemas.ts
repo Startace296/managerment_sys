@@ -6,7 +6,10 @@ export const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
-  role: z.nativeEnum(UserRole).optional(),
+});
+
+export const updateUserRoleSchema = z.object({
+  role: z.nativeEnum(UserRole),
 });
 
 export const loginSchema = z.object({
@@ -56,4 +59,9 @@ export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
+});
+
+export const employeeQuerySchema = paginationSchema.extend({
+  departmentId: z.coerce.number().int().positive().optional(),
+  status: z.nativeEnum(EmployeeStatus).optional(),
 });
