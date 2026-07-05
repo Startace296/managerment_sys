@@ -35,11 +35,15 @@ export default function Dashboard() {
   const statCards = [
     { label: "Employees", value: String(stats.totalEmployees) },
     { label: "Departments", value: String(stats.totalDepartments) },
-    {
-      label: "Monthly payroll",
-      value: formatVnd(stats.totalSalary),
-      mono: true,
-    },
+    ...(stats.totalSalary !== undefined
+      ? [
+          {
+            label: "Monthly payroll",
+            value: formatVnd(stats.totalSalary),
+            mono: true,
+          },
+        ]
+      : []),
     {
       label: "Active",
       value: String(stats.byStatus.active ?? 0),

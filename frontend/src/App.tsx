@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
@@ -27,6 +28,12 @@ function LoginRoute() {
   return <AuthPage />;
 }
 
+function ManagerRoute({ children }: { children: ReactNode }) {
+  const { isManagerUp } = useAuth();
+  if (!isManagerUp) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <ToastProvider>
@@ -36,7 +43,14 @@ export default function App() {
             <Route path="/login" element={<LoginRoute />} />
             <Route element={<Protected />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/employees" element={<Employees />} />
+              <Route
+                path="/employees"
+                element={
+                  <ManagerRoute>
+                    <Employees />
+                  </ManagerRoute>
+                }
+              />
               <Route path="/departments" element={<Departments />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

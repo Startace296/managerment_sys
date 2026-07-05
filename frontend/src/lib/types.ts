@@ -74,9 +74,9 @@ export interface TokenPair {
 export interface DashboardStats {
   totalEmployees: number;
   totalDepartments: number;
-  totalSalary: number;
+  totalSalary?: number;
   byStatus: Record<EmployeeStatus, number>;
-  recentEmployees: Employee[];
+  recentEmployees: Omit<Employee, "salary">[];
 }
 
 export const STATUS_LABEL: Record<EmployeeStatus, string> = {

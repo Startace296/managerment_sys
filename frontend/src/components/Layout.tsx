@@ -17,6 +17,7 @@ const NAV = [
     icon: (
       <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z" />
     ),
+    managerUp: true,
   },
   {
     to: "/departments",
@@ -26,9 +27,11 @@ const NAV = [
 ];
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, isManagerUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const nav = NAV.filter((item) => !item.managerUp || isManagerUp);
 
   const handleLogout = async () => {
     await logout();
@@ -50,7 +53,7 @@ export default function Layout() {
         </div>
 
         <nav className="mt-2 flex-1 space-y-1 px-3">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
