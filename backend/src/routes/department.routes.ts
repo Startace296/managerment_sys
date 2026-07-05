@@ -14,7 +14,11 @@ const router = Router();
 router.use(authenticate);
 
 router.get("/", validate(paginationSchema, "query"), departmentController.getAll);
-router.get("/:id", departmentController.getById);
+router.get(
+  "/:id",
+  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  departmentController.getById
+);
 
 router.post(
   "/",

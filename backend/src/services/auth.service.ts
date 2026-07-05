@@ -101,7 +101,7 @@ class AuthService {
       throw new AppError("Invalid or expired refresh token", 401);
     }
 
-    const user = await userRepository.findOne({ where: { id: payload.userId } });
+    const user = await userRepository.findByIdWithRefreshToken(payload.userId);
     if (!user || user.refreshToken !== token) {
       throw new AppError("Refresh token revoked", 401);
     }

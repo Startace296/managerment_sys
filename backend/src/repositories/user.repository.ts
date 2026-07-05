@@ -13,6 +13,13 @@ export const userRepository = AppDataSource.getRepository(User).extend({
       .getOne();
   },
 
+  findByIdWithRefreshToken(id: number) {
+    return this.createQueryBuilder("user")
+      .addSelect("user.refreshToken")
+      .where("user.id = :id", { id })
+      .getOne();
+  },
+
   findByIdWithEmployee(id: number) {
     return this.findOne({
       where: { id },

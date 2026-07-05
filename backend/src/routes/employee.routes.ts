@@ -13,8 +13,17 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/", validate(employeeQuerySchema, "query"), employeeController.getAll);
-router.get("/:id", employeeController.getById);
+router.get(
+  "/",
+  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  validate(employeeQuerySchema, "query"),
+  employeeController.getAll
+);
+router.get(
+  "/:id",
+  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  employeeController.getById
+);
 
 router.post(
   "/",

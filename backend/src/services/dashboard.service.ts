@@ -1,18 +1,21 @@
 import { employeeRepository } from "../repositories/employee.repository";
 import { departmentRepository } from "../repositories/department.repository";
 import { Employee } from "../entities/Employee";
-import { EmployeeStatus } from "../types";
+import { EmployeeStatus, UserRole } from "../types";
 
 export interface DashboardStats {
   totalEmployees: number;
   totalDepartments: number;
-  totalSalary: number;
+  totalSalary?: number;
   byStatus: Record<EmployeeStatus, number>;
-  recentEmployees: Employee[];
+  recentEmployees: Omit<Employee, "salary">[] | Employee[];
 }
 
+const canViewSalary = (role: UserRole) =>
+  role === UserRole.ADMIN || role === UserRole.MANAGER;
+
 class DashboardService {
-  async getStats(): Promise<DashboardStats> {
+  async getStats(role: UserRole): Promise<DashboardStats> {
     const [totalEmployees, totalDepartments, salaryRow, statusRows, recentEmployees] =
       await Promise.all([
         employeeRepository.count(),
@@ -42,12 +45,16 @@ class DashboardService {
       byStatus[row.status] = Number(row.count);
     }
 
+    const showSalary = canViewSalary(role);
+
     return {
       totalEmployees,
       totalDepartments,
-      totalSalary: Number(salaryRow?.sum ?? 0),
+      ...(showSalary && { totalSalary: Number(salaryRow?.sum ?? 0) }),
       byStatus,
-      recentEmployees,
+      recentEmployees: showSalary
+        ? recentEmployees
+        : recentEmployees.map(({ salary: _salary, ...rest }) => rest),
     };
   }
 }

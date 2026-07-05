@@ -29,7 +29,7 @@ export class User {
   @Column({ type: "enum", enum: UserRole, default: UserRole.EMPLOYEE })
   role: UserRole;
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ nullable: true, length: 500, select: false })
   refreshToken: string;
 
   @Column({ default: true })
