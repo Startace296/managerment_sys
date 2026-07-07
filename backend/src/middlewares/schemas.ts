@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { UserRole, EmployeeStatus } from "../types";
+import {
+  UserRole,
+  EmployeeStatus,
+  AttendanceStatus,
+  LeaveType,
+  LeaveStatus,
+} from "../types";
 
 export const registerSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -64,4 +70,43 @@ export const paginationSchema = z.object({
 export const employeeQuerySchema = paginationSchema.extend({
   departmentId: z.coerce.number().int().positive().optional(),
   status: z.nativeEnum(EmployeeStatus).optional(),
+});
+
+export const checkInSchema = z.object({
+  note: z.string().max(500).optional(),
+});
+
+export const attendanceQuerySchema = paginationSchema.extend({
+  employeeId: z.coerce.number().int().positive().optional(),
+  departmentId: z.coerce.number().int().positive().optional(),
+  status: z.nativeEnum(AttendanceStatus).optional(),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date").optional(),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date").optional(),
+});
+
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date");
+
+export const createLeaveRequestSchema = z
+  .object({
+    leaveType: z.nativeEnum(LeaveType),
+    startDate: isoDate,
+    endDate: isoDate,
+    reason: z.string().min(1).max(500),
+  })
+  .refine((data) => data.startDate <= data.endDate, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });
+
+export const reviewLeaveRequestSchema = z.object({
+  note: z.string().max(500).optional(),
+});
+
+export const leaveRequestQuerySchema = paginationSchema.extend({
+  employeeId: z.coerce.number().int().positive().optional(),
+  departmentId: z.coerce.number().int().positive().optional(),
+  status: z.nativeEnum(LeaveStatus).optional(),
+  leaveType: z.nativeEnum(LeaveType).optional(),
+  from: isoDate.optional(),
+  to: isoDate.optional(),
 });

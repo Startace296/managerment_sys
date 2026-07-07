@@ -12,6 +12,25 @@ export enum EmployeeStatus {
   ON_LEAVE = "on_leave",
 }
 
+export enum AttendanceStatus {
+  PRESENT = "present",
+  LATE = "late",
+}
+
+export enum LeaveType {
+  ANNUAL = "annual",
+  SICK = "sick",
+  UNPAID = "unpaid",
+  OTHER = "other",
+}
+
+export enum LeaveStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  CANCELLED = "cancelled",
+}
+
 export interface JwtPayload {
   userId: number;
   email: string;

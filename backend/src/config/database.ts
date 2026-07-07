@@ -3,6 +3,8 @@ import { env } from "./env";
 import { User } from "../entities/User";
 import { Department } from "../entities/Department";
 import { Employee } from "../entities/Employee";
+import { Attendance } from "../entities/Attendance";
+import { LeaveRequest } from "../entities/LeaveRequest";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -13,6 +15,6 @@ export const AppDataSource = new DataSource({
   password: env.DB_PASSWORD,
   synchronize: env.NODE_ENV === "development",
   logging: env.NODE_ENV === "development",
-  entities: [User, Department, Employee],
+  entities: [User, Department, Employee, Attendance, LeaveRequest],
   migrations: [],
 });
