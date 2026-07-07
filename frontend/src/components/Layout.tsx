@@ -20,6 +20,20 @@ const NAV = [
     managerUp: true,
   },
   {
+    to: "/attendance",
+    label: "Attendance",
+    icon: (
+      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 10.4l4.2 2.5-.75 1.24L11 13.5V6h1.5v6.4z" />
+    ),
+  },
+  {
+    to: "/leave-requests",
+    label: "Leave requests",
+    icon: (
+      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+    ),
+  },
+  {
     to: "/departments",
     label: "Departments",
     icon: <path d="M4 21V7l8-4 8 4v14h-6v-5h-4v5H4zm5-9h2V9H9v3zm4 0h2V9h-2v3z" />,

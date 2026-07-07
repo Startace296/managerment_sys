@@ -1,5 +1,8 @@
 export type UserRole = "admin" | "manager" | "employee";
 export type EmployeeStatus = "active" | "inactive" | "on_leave";
+export type AttendanceStatus = "present" | "late";
+export type LeaveType = "annual" | "sick" | "unpaid" | "other";
+export type LeaveStatus = "pending" | "approved" | "rejected" | "cancelled";
 
 export interface User {
   id: number;
@@ -43,6 +46,39 @@ export interface Employee {
   updatedAt: string;
   user?: User;
   department?: Department | null;
+}
+
+export interface Attendance {
+  id: number;
+  workDate: string;
+  checkIn: string;
+  checkOut: string | null;
+  workedMinutes: number | null;
+  status: AttendanceStatus;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+  employee?: Employee;
+}
+
+export interface TodayAttendance {
+  hasProfile: boolean;
+  record: Attendance | null;
+}
+
+export interface LeaveRequest {
+  id: number;
+  leaveType: LeaveType;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  status: LeaveStatus;
+  reviewNote: string | null;
+  reviewedAt: string | null;
+  reviewedBy?: User | null;
+  createdAt: string;
+  updatedAt: string;
+  employee?: Employee;
 }
 
 export interface ApiResponse<T> {
@@ -91,6 +127,25 @@ export const ROLE_LABEL: Record<UserRole, string> = {
   employee: "Employee",
 };
 
+export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
+  present: "Present",
+  late: "Late",
+};
+
+export const LEAVE_TYPE_LABEL: Record<LeaveType, string> = {
+  annual: "Annual leave",
+  sick: "Sick leave",
+  unpaid: "Unpaid leave",
+  other: "Other",
+};
+
+export const LEAVE_STATUS_LABEL: Record<LeaveStatus, string> = {
+  pending: "Pending",
+  approved: "Approved",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
+};
+
 export const formatVnd = (v: string | number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -100,3 +155,20 @@ export const formatVnd = (v: string | number) =>
 
 export const formatDate = (v: string | Date) =>
   new Date(v).toLocaleDateString("en-US");
+
+export const formatTime = (v: string | Date) =>
+  new Date(v).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+export const formatMinutes = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+
+export const leaveDays = (startDate: string, endDate: string) => {
+  const ms = new Date(endDate).getTime() - new Date(startDate).getTime();
+  return Math.round(ms / 86_400_000) + 1;
+};
