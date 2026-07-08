@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import app from "./app";
-import { AppDataSource } from "./config/database";
+import { ensureDatabaseConnection } from "./config/database";
 import { env } from "./config/env";
 
 const bootstrap = async () => {
   try {
-    await AppDataSource.initialize();
+    await ensureDatabaseConnection();
     console.log("Database connected successfully");
 
     app.listen(env.PORT, () => {

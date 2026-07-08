@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { env } from "./env";
 import { User } from "../entities/User";
@@ -18,3 +19,21 @@ export const AppDataSource = new DataSource({
   entities: [User, Department, Employee, Attendance, LeaveRequest],
   migrations: [],
 });
+
+let connectionPromise: Promise<DataSource> | null = null;
+
+// Serverless functions can receive concurrent requests on a cold start,
+// so the first requests share a single in-flight initialize() call instead
+// of each opening their own connection.
+export const ensureDatabaseConnection = (): Promise<DataSource> => {
+  if (AppDataSource.isInitialized) {
+    return Promise.resolve(AppDataSource);
+  }
+  if (!connectionPromise) {
+    connectionPromise = AppDataSource.initialize().catch((error) => {
+      connectionPromise = null;
+      throw error;
+    });
+  }
+  return connectionPromise;
+};
