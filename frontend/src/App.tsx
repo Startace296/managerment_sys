@@ -9,6 +9,7 @@ import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
 import AttendancePage from "./pages/Attendance";
 import LeaveRequestsPage from "./pages/LeaveRequests";
+import ProfilePage from "./pages/Profile";
 import { Spinner } from "./components/ui";
 
 function Protected() {
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="/departments" element={<Departments />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/leave-requests" element={<LeaveRequestsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

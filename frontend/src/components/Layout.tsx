@@ -38,6 +38,13 @@ const NAV = [
     label: "Departments",
     icon: <path d="M4 21V7l8-4 8 4v14h-6v-5h-4v5H4zm5-9h2V9H9v3zm4 0h2V9h-2v3z" />,
   },
+  {
+    to: "/profile",
+    label: "My profile",
+    icon: (
+      <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.4 0-8 2.24-8 5v3h16v-3c0-2.76-3.6-5-8-5z" />
+    ),
+  },
 ];
 
 export default function Layout() {
