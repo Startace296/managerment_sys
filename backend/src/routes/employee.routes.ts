@@ -5,6 +5,7 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   createEmployeeSchema,
   updateEmployeeSchema,
+  updateOwnProfileSchema,
   employeeQuerySchema,
 } from "../middlewares/schemas";
 import { UserRole } from "../types";
@@ -12,6 +13,14 @@ import { UserRole } from "../types";
 const router = Router();
 
 router.use(authenticate);
+
+// Self-service (any authenticated user with an employee profile)
+router.get("/me", employeeController.getMe);
+router.put(
+  "/me",
+  validate(updateOwnProfileSchema),
+  employeeController.updateMe
+);
 
 router.get(
   "/",

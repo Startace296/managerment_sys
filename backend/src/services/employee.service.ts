@@ -26,6 +26,11 @@ interface UpdateEmployeeDto {
   status?: EmployeeStatus;
 }
 
+interface UpdateOwnProfileDto {
+  phone?: string;
+  address?: string;
+}
+
 interface EmployeeFilter extends PaginationQuery {
   departmentId?: number;
   status?: EmployeeStatus;
@@ -117,6 +122,30 @@ class EmployeeService {
       throw new AppError("Employee not found", 404);
     }
     await employeeRepository.remove(employee);
+  }
+
+  private async getEmployeeByUserId(userId: number): Promise<Employee> {
+    const employee = await employeeRepository.findByUserId(userId);
+    if (!employee) {
+      throw new AppError(
+        "No employee profile is linked to your account",
+        404
+      );
+    }
+    return employee;
+  }
+
+  async getOwnProfile(userId: number): Promise<Employee> {
+    return this.getEmployeeByUserId(userId);
+  }
+
+  async updateOwnProfile(
+    userId: number,
+    dto: UpdateOwnProfileDto
+  ): Promise<Employee> {
+    const employee = await this.getEmployeeByUserId(userId);
+    Object.assign(employee, dto);
+    return employeeRepository.save(employee);
   }
 }
 

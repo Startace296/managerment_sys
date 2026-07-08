@@ -61,6 +61,11 @@ export const updateEmployeeSchema = z.object({
   status: z.nativeEnum(EmployeeStatus).optional(),
 });
 
+export const updateOwnProfileSchema = z.object({
+  phone: z.string().max(20).optional(),
+  address: z.string().optional(),
+});
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),

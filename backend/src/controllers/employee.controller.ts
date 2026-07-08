@@ -1,8 +1,30 @@
 import { Request, Response, NextFunction } from "express";
 import { employeeService } from "../services/employee.service";
 import { sendSuccess, sendPaginated } from "../utils/response";
+import { AuthRequest } from "../types";
 
 class EmployeeController {
+  async getMe(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const employee = await employeeService.getOwnProfile(req.user!.userId);
+      sendSuccess(res, employee);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateMe(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const employee = await employeeService.updateOwnProfile(
+        req.user!.userId,
+        req.body
+      );
+      sendSuccess(res, employee, "Profile updated");
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await employeeService.getAll(req.query);
