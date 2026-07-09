@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import axios from "axios";
 import { api, getApiError } from "../lib/api";
 import type { ApiResponse, Employee } from "../lib/types";
@@ -97,6 +103,19 @@ export default function ProfilePage() {
     }
   };
 
+  const displayName = profile?.user
+    ? `${profile.user.lastName} ${profile.user.firstName}`
+    : user?.email ?? "";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .reduce(
+      (acc, word, i, words) =>
+        i === 0 || i === words.length - 1 ? acc + word[0] : acc,
+      ""
+    )
+    .toUpperCase();
+
   return (
     <div>
       <header className="mb-6">
@@ -114,78 +133,67 @@ export default function ProfilePage() {
             <EmptyState text="Your account isn't linked to an employee profile yet. Ask an admin to set one up." />
           ) : (
             profile && (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-xl border border-line bg-surface p-5">
-                  <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
-                    Account details
-                  </h2>
-                  <dl className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Name</dt>
-                      <dd className="font-semibold">
-                        {profile.user
-                          ? `${profile.user.lastName} ${profile.user.firstName}`
-                          : "—"}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Email</dt>
-                      <dd className="font-semibold">{user?.email}</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Role</dt>
-                      <dd className="font-semibold">
-                        {user ? ROLE_LABEL[user.role] : "—"}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Employee code</dt>
-                      <dd className="font-mono font-semibold">
-                        {profile.employeeCode}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Department</dt>
-                      <dd className="font-semibold">
-                        {profile.department?.name ?? "—"}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Position</dt>
-                      <dd className="font-semibold">{profile.position}</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Status</dt>
-                      <dd>
-                        <StatusBadge status={profile.status} />
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Date of birth</dt>
-                      <dd className="font-semibold">
-                        {formatDate(profile.dateOfBirth)}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Hire date</dt>
-                      <dd className="font-semibold">
-                        {formatDate(profile.hireDate)}
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-ink-soft">Salary</dt>
-                      <dd className="font-semibold">
-                        {formatVnd(profile.salary)}
-                      </dd>
-                    </div>
-                  </dl>
+              <div className="space-y-5">
+                {/* Identity summary */}
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-5">
+                  <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-petrol text-lg font-bold text-white">
+                    {initials || "?"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-lg font-extrabold">
+                      {displayName}
+                    </p>
+                    <p className="truncate text-sm text-ink-soft">
+                      {user?.email}
+                      {profile.employeeCode && ` · ${profile.employeeCode}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {user && (
+                      <span className="rounded-full bg-petrol-soft px-2.5 py-1 text-xs font-semibold text-petrol">
+                        {ROLE_LABEL[user.role]}
+                      </span>
+                    )}
+                    <StatusBadge status={profile.status} />
+                  </div>
                 </div>
 
+                {/* Quick stats */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <StatTile
+                    icon={<path d="M4 21V7l8-4 8 4v14h-6v-5h-4v5H4zm5-9h2V9H9v3zm4 0h2V9h-2v3z" />}
+                    label="Department"
+                    value={profile.department?.name ?? "—"}
+                  />
+                  <StatTile
+                    icon={
+                      <path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2h4a2 2 0 012 2v3H3V8a2 2 0 012-2h4zm2-2v2h2V4h-2zM3 13h18v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z" />
+                    }
+                    label="Position"
+                    value={profile.position}
+                  />
+                  <StatTile
+                    icon={
+                      <path d="M7 2v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2V2h-2v2H9V2H7zM5 10h14v10H5V10z" />
+                    }
+                    label="Hire date"
+                    value={formatDate(profile.hireDate)}
+                  />
+                  <StatTile
+                    icon={
+                      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1.13 15.36V19h-2v-1.62c-1.15-.22-2.13-.9-2.66-1.98l1.65-.96c.3.58.9.98 1.68.98.85 0 1.4-.4 1.4-.98 0-.62-.58-.87-1.77-1.2C9.2 12.72 8 12.1 8 10.5c0-1.28.94-2.22 2.13-2.47V6.5h2v1.5c1.02.21 1.78.82 2.16 1.63l-1.6.86c-.22-.4-.65-.68-1.19-.68-.68 0-1.13.32-1.13.82 0 .56.5.78 1.65 1.1C13.7 12.28 15 12.9 15 14.5c0 1.35-.98 2.37-2.37 2.62z" />
+                    }
+                    label="Salary"
+                    value={formatVnd(profile.salary)}
+                  />
+                </div>
+
+                {/* Contact */}
                 <div className="rounded-xl border border-line bg-surface p-5">
                   <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
                     Contact information
                   </h2>
-                  <form onSubmit={submit} className="space-y-4">
+                  <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
                     <Field label="Phone">
                       <input
                         className={inputCls}
@@ -198,8 +206,8 @@ export default function ProfilePage() {
                       />
                     </Field>
                     <Field label="Address">
-                      <textarea
-                        className={`${inputCls} min-h-24 resize-y`}
+                      <input
+                        className={inputCls}
                         value={form.address}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, address: e.target.value }))
@@ -207,7 +215,7 @@ export default function ProfilePage() {
                         placeholder="Your current address"
                       />
                     </Field>
-                    <div className="flex justify-end pt-1">
+                    <div className="sm:col-span-2 flex justify-end pt-1">
                       <Button type="submit" disabled={busy}>
                         {busy ? "Saving…" : "Save changes"}
                       </Button>
@@ -218,24 +226,31 @@ export default function ProfilePage() {
             )
           )}
 
-          <div className="mt-6 max-w-md rounded-xl border border-line bg-surface p-5">
+          {/* Security — always available, even without a linked employee profile */}
+          <div className="mt-5 rounded-xl border border-line bg-surface p-5">
             <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Security
             </h2>
-            <form onSubmit={submitPasswordChange} className="space-y-4">
+            <form
+              onSubmit={submitPasswordChange}
+              className="grid gap-4 sm:grid-cols-3"
+            >
               <Field label="Current password">
                 <input
                   type="password"
                   className={inputCls}
                   value={pwForm.currentPassword}
                   onChange={(e) =>
-                    setPwForm((f) => ({ ...f, currentPassword: e.target.value }))
+                    setPwForm((f) => ({
+                      ...f,
+                      currentPassword: e.target.value,
+                    }))
                   }
                   required
                   placeholder="••••••••"
                 />
               </Field>
-              <Field label="New password" hint="At least 6 characters">
+              <Field label="New password" hint="Min. 6 characters">
                 <input
                   type="password"
                   className={inputCls}
@@ -248,20 +263,23 @@ export default function ProfilePage() {
                   placeholder="••••••••"
                 />
               </Field>
-              <Field label="Confirm new password">
+              <Field label="Confirm">
                 <input
                   type="password"
                   className={inputCls}
                   value={pwForm.confirmPassword}
                   onChange={(e) =>
-                    setPwForm((f) => ({ ...f, confirmPassword: e.target.value }))
+                    setPwForm((f) => ({
+                      ...f,
+                      confirmPassword: e.target.value,
+                    }))
                   }
                   required
                   minLength={6}
                   placeholder="••••••••"
                 />
               </Field>
-              <div className="flex justify-end pt-1">
+              <div className="sm:col-span-3 flex justify-end pt-1">
                 <Button type="submit" disabled={pwBusy}>
                   {pwBusy ? "Updating…" : "Change password"}
                 </Button>
@@ -270,6 +288,28 @@ export default function ProfilePage() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function StatTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border border-line bg-surface p-3">
+      <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-soft">
+        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+          {icon}
+        </svg>
+        {label}
+      </div>
+      <p className="truncate text-sm font-bold">{value}</p>
     </div>
   );
 }
