@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
@@ -164,6 +164,17 @@ export default function AuthPage() {
               placeholder="••••••••"
             />
           </Field>
+
+          {mode === "login" && (
+            <div className="text-right">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-petrol hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          )}
 
           <Button type="submit" disabled={busy} className="w-full py-2.5">
             {busy

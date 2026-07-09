@@ -24,6 +24,13 @@ export default function ProfilePage() {
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ phone: "", address: "" });
 
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwForm, setPwForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -69,6 +76,27 @@ export default function ProfilePage() {
     }
   };
 
+  const submitPasswordChange = async (ev: FormEvent) => {
+    ev.preventDefault();
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      push("error", "New password and confirmation don't match");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      await api.post("/auth/change-password", {
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword,
+      });
+      push("success", "Password changed successfully");
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      push("error", getApiError(err));
+    } finally {
+      setPwBusy(false);
+    }
+  };
+
   return (
     <div>
       <header className="mb-6">
@@ -80,112 +108,167 @@ export default function ProfilePage() {
 
       {loading ? (
         <Spinner />
-      ) : !hasProfile ? (
-        <EmptyState text="Your account isn't linked to an employee profile yet. Ask an admin to set one up." />
       ) : (
-        profile && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-line bg-surface p-5">
-              <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
-                Account details
-              </h2>
-              <dl className="space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Name</dt>
-                  <dd className="font-semibold">
-                    {profile.user
-                      ? `${profile.user.lastName} ${profile.user.firstName}`
-                      : "—"}
-                  </dd>
+        <>
+          {!hasProfile ? (
+            <EmptyState text="Your account isn't linked to an employee profile yet. Ask an admin to set one up." />
+          ) : (
+            profile && (
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-xl border border-line bg-surface p-5">
+                  <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
+                    Account details
+                  </h2>
+                  <dl className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Name</dt>
+                      <dd className="font-semibold">
+                        {profile.user
+                          ? `${profile.user.lastName} ${profile.user.firstName}`
+                          : "—"}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Email</dt>
+                      <dd className="font-semibold">{user?.email}</dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Role</dt>
+                      <dd className="font-semibold">
+                        {user ? ROLE_LABEL[user.role] : "—"}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Employee code</dt>
+                      <dd className="font-mono font-semibold">
+                        {profile.employeeCode}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Department</dt>
+                      <dd className="font-semibold">
+                        {profile.department?.name ?? "—"}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Position</dt>
+                      <dd className="font-semibold">{profile.position}</dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Status</dt>
+                      <dd>
+                        <StatusBadge status={profile.status} />
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Date of birth</dt>
+                      <dd className="font-semibold">
+                        {formatDate(profile.dateOfBirth)}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Hire date</dt>
+                      <dd className="font-semibold">
+                        {formatDate(profile.hireDate)}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-ink-soft">Salary</dt>
+                      <dd className="font-semibold">
+                        {formatVnd(profile.salary)}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Email</dt>
-                  <dd className="font-semibold">{user?.email}</dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Role</dt>
-                  <dd className="font-semibold">
-                    {user ? ROLE_LABEL[user.role] : "—"}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Employee code</dt>
-                  <dd className="font-mono font-semibold">
-                    {profile.employeeCode}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Department</dt>
-                  <dd className="font-semibold">
-                    {profile.department?.name ?? "—"}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Position</dt>
-                  <dd className="font-semibold">{profile.position}</dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Status</dt>
-                  <dd>
-                    <StatusBadge status={profile.status} />
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Date of birth</dt>
-                  <dd className="font-semibold">
-                    {formatDate(profile.dateOfBirth)}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Hire date</dt>
-                  <dd className="font-semibold">
-                    {formatDate(profile.hireDate)}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-ink-soft">Salary</dt>
-                  <dd className="font-semibold">
-                    {formatVnd(profile.salary)}
-                  </dd>
-                </div>
-              </dl>
-            </div>
 
-            <div className="rounded-xl border border-line bg-surface p-5">
-              <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
-                Contact information
-              </h2>
-              <form onSubmit={submit} className="space-y-4">
-                <Field label="Phone">
-                  <input
-                    className={inputCls}
-                    value={form.phone}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, phone: e.target.value }))
-                    }
-                    maxLength={20}
-                    placeholder="e.g. 0912345678"
-                  />
-                </Field>
-                <Field label="Address">
-                  <textarea
-                    className={`${inputCls} min-h-24 resize-y`}
-                    value={form.address}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, address: e.target.value }))
-                    }
-                    placeholder="Your current address"
-                  />
-                </Field>
-                <div className="flex justify-end pt-1">
-                  <Button type="submit" disabled={busy}>
-                    {busy ? "Saving…" : "Save changes"}
-                  </Button>
+                <div className="rounded-xl border border-line bg-surface p-5">
+                  <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
+                    Contact information
+                  </h2>
+                  <form onSubmit={submit} className="space-y-4">
+                    <Field label="Phone">
+                      <input
+                        className={inputCls}
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, phone: e.target.value }))
+                        }
+                        maxLength={20}
+                        placeholder="e.g. 0912345678"
+                      />
+                    </Field>
+                    <Field label="Address">
+                      <textarea
+                        className={`${inputCls} min-h-24 resize-y`}
+                        value={form.address}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, address: e.target.value }))
+                        }
+                        placeholder="Your current address"
+                      />
+                    </Field>
+                    <div className="flex justify-end pt-1">
+                      <Button type="submit" disabled={busy}>
+                        {busy ? "Saving…" : "Save changes"}
+                      </Button>
+                    </div>
+                  </form>
                 </div>
-              </form>
-            </div>
+              </div>
+            )
+          )}
+
+          <div className="mt-6 max-w-md rounded-xl border border-line bg-surface p-5">
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Security
+            </h2>
+            <form onSubmit={submitPasswordChange} className="space-y-4">
+              <Field label="Current password">
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={pwForm.currentPassword}
+                  onChange={(e) =>
+                    setPwForm((f) => ({ ...f, currentPassword: e.target.value }))
+                  }
+                  required
+                  placeholder="••••••••"
+                />
+              </Field>
+              <Field label="New password" hint="At least 6 characters">
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={pwForm.newPassword}
+                  onChange={(e) =>
+                    setPwForm((f) => ({ ...f, newPassword: e.target.value }))
+                  }
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                />
+              </Field>
+              <Field label="Confirm new password">
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={pwForm.confirmPassword}
+                  onChange={(e) =>
+                    setPwForm((f) => ({ ...f, confirmPassword: e.target.value }))
+                  }
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                />
+              </Field>
+              <div className="flex justify-end pt-1">
+                <Button type="submit" disabled={pwBusy}>
+                  {pwBusy ? "Updating…" : "Change password"}
+                </Button>
+              </div>
+            </form>
           </div>
-        )
+        </>
       )}
     </div>
   );
