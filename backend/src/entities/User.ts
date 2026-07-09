@@ -32,6 +32,12 @@ export class User {
   @Column({ nullable: true, length: 500, select: false })
   refreshToken: string;
 
+  @Column({ type: "varchar", nullable: true, length: 255, select: false })
+  resetPasswordToken: string | null;
+
+  @Column({ type: "datetime", nullable: true, select: false })
+  resetPasswordExpires: Date | null;
+
   @Column({ default: true })
   isActive: boolean;
 

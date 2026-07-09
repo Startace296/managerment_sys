@@ -1,10 +1,17 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { userRepository } from "../repositories/user.repository";
 import { AppError } from "../utils/AppError";
+import { sendPasswordResetEmail } from "../utils/mailer";
 import { JwtPayload, UserRole } from "../types";
 import { User } from "../entities/User";
+
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+const hashToken = (token: string): string =>
+  crypto.createHash("sha256").update(token).digest("hex");
 
 interface RegisterDto {
   email: string;
@@ -121,6 +128,60 @@ class AuthService {
 
   async logout(userId: number): Promise<void> {
     await userRepository.update(userId, { refreshToken: "" });
+  }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    const user = await userRepository.findByIdWithPassword(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new AppError("Current password is incorrect", 400);
+    }
+
+    user.password = await bcrypt.hash(newPassword, env.BCRYPT_ROUNDS);
+    // Invalidate any existing session — the user (or whoever guessed the
+    // current password) must sign in again with the new credentials.
+    user.refreshToken = "";
+    await userRepository.save(user);
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await userRepository.findByEmail(email);
+    // Always resolve the same way whether or not the email exists, so this
+    // endpoint can't be used to enumerate registered accounts.
+    if (!user) return;
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = hashToken(rawToken);
+    user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+    await userRepository.save(user);
+
+    const resetLink = `${env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+    await sendPasswordResetEmail(user.email, resetLink);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await userRepository.findByResetToken(hashToken(token));
+    if (
+      !user ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires.getTime() < Date.now()
+    ) {
+      throw new AppError("Invalid or expired reset token", 400);
+    }
+
+    user.password = await bcrypt.hash(newPassword, env.BCRYPT_ROUNDS);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    user.refreshToken = "";
+    await userRepository.save(user);
   }
 }
 

@@ -48,6 +48,43 @@ class AuthController {
       next(error);
     }
   }
+
+  async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      await authService.changePassword(
+        req.user!.userId,
+        currentPassword,
+        newPassword
+      );
+      sendSuccess(res, null, "Password changed successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      await authService.forgotPassword(req.body.email);
+      sendSuccess(
+        res,
+        null,
+        "If an account exists for this email, a reset link has been sent"
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, newPassword } = req.body;
+      await authService.resetPassword(token, newPassword);
+      sendSuccess(res, null, "Password reset successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const authController = new AuthController();

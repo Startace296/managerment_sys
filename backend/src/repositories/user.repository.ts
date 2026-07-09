@@ -20,6 +20,20 @@ export const userRepository = AppDataSource.getRepository(User).extend({
       .getOne();
   },
 
+  findByIdWithPassword(id: number) {
+    return this.createQueryBuilder("user")
+      .addSelect("user.password")
+      .where("user.id = :id", { id })
+      .getOne();
+  },
+
+  findByResetToken(hashedToken: string) {
+    return this.createQueryBuilder("user")
+      .addSelect(["user.resetPasswordToken", "user.resetPasswordExpires"])
+      .where("user.resetPasswordToken = :hashedToken", { hashedToken })
+      .getOne();
+  },
+
   findByIdWithEmployee(id: number) {
     return this.findOne({
       where: { id },
