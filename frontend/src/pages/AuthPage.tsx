@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { Button, Field, inputCls } from "../components/ui";
+import Logo from "../components/Logo";
 import { getApiError } from "../lib/api";
 import { ROLE_LABEL } from "../lib/types";
 
@@ -74,9 +75,7 @@ export default function AuthPage() {
         className="relative w-full max-w-md rounded-2xl bg-surface p-8 shadow-2xl"
       >
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-petrol font-mono text-sm font-bold text-signal">
-            HR
-          </div>
+          <Logo className="size-10 shrink-0" />
           <div>
             <h1 className="text-xl font-extrabold leading-tight">
               HR Management

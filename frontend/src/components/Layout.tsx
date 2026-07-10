@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { ROLE_LABEL } from "../lib/types";
+import Logo from "./Logo";
 
 const NAV = [
   {
@@ -64,9 +65,7 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className="fixed inset-y-0 left-0 flex w-56 flex-col bg-petrol-deep text-white">
         <div className="flex items-center gap-3 px-5 py-6">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-signal font-mono text-sm font-bold text-petrol-deep">
-            HR
-          </div>
+          <Logo className="size-9 shrink-0" />
           <div>
             <p className="text-sm font-bold leading-tight">HR Management</p>
             <p className="text-[10px] text-white/50">Internal system</p>
