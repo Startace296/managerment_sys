@@ -18,6 +18,18 @@ export const updateUserRoleSchema = z.object({
   role: z.nativeEnum(UserRole),
 });
 
+export const verifyOtpSchema = z.object({
+  email: z.string().email("Invalid email"),
+  otp: z
+    .string()
+    .length(6, "OTP must be 6 digits")
+    .regex(/^\d{6}$/, "OTP must be numeric"),
+});
+
+export const resendOtpSchema = z.object({
+  email: z.string().email("Invalid email"),
+});
+
 export const loginSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(1, "Password is required"),

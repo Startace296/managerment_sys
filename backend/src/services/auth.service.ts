@@ -4,14 +4,18 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { userRepository } from "../repositories/user.repository";
 import { AppError } from "../utils/AppError";
-import { sendPasswordResetEmail } from "../utils/mailer";
+import { sendPasswordResetEmail, sendOtpEmail } from "../utils/mailer";
 import { JwtPayload, UserRole } from "../types";
 import { User } from "../entities/User";
 
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 const hashToken = (token: string): string =>
   crypto.createHash("sha256").update(token).digest("hex");
+
+const generateOtp = (): string =>
+  crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
 
 interface RegisterDto {
   email: string;
@@ -43,7 +47,7 @@ class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async register(dto: RegisterDto): Promise<Omit<User, "password">> {
+  async register(dto: RegisterDto): Promise<Omit<User, "password" | "otpCode">> {
     const existing = await userRepository.findByEmail(dto.email);
     if (existing) {
       throw new AppError("Email already in use", 409);
@@ -58,16 +62,66 @@ class AuthService {
     const userCount = await userRepository.count();
     const role = userCount === 0 ? UserRole.ADMIN : UserRole.EMPLOYEE;
 
+    const otp = generateOtp();
+
     const user = userRepository.create({
       ...dto,
       password: hashed,
       role,
+      isEmailVerified: false,
+      otpCode: hashToken(otp),
+      otpExpires: new Date(Date.now() + OTP_TTL_MS),
     });
 
     await userRepository.save(user);
+    await sendOtpEmail(user.email, otp);
 
-    const { password: _, ...result } = user as User & { password: string };
+    const { password: _, otpCode: __, ...result } = user as User & {
+      password: string;
+    };
     return result;
+  }
+
+  async verifyOtp(email: string, otp: string): Promise<void> {
+    const user = await userRepository.findByEmailWithOtp(email);
+    if (!user) {
+      throw new AppError("Invalid or expired OTP", 400);
+    }
+
+    if (user.isEmailVerified) {
+      throw new AppError("Email already verified", 400);
+    }
+
+    if (
+      !user.otpCode ||
+      !user.otpExpires ||
+      user.otpExpires.getTime() < Date.now()
+    ) {
+      throw new AppError("OTP expired, please request a new one", 400);
+    }
+
+    if (user.otpCode !== hashToken(otp)) {
+      throw new AppError("Invalid or expired OTP", 400);
+    }
+
+    user.isEmailVerified = true;
+    user.otpCode = null;
+    user.otpExpires = null;
+    await userRepository.save(user);
+  }
+
+  async resendOtp(email: string): Promise<void> {
+    const user = await userRepository.findByEmail(email);
+    // Always resolve the same way whether or not the email exists or is
+    // already verified, so this endpoint can't be used to enumerate accounts.
+    if (!user || user.isEmailVerified) return;
+
+    const otp = generateOtp();
+    user.otpCode = hashToken(otp);
+    user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
+    await userRepository.save(user);
+
+    await sendOtpEmail(user.email, otp);
   }
 
   async login(dto: LoginDto): Promise<{ user: Partial<User>; tokens: TokenPair }> {
@@ -80,6 +134,13 @@ class AuthService {
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) {
       throw new AppError("Invalid credentials", 401);
+    }
+
+    if (!user.isEmailVerified) {
+      throw new AppError(
+        "Please verify your email with the OTP sent to your inbox before signing in",
+        403
+      );
     }
 
     const payload: JwtPayload = {

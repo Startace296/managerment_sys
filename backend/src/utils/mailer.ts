@@ -23,3 +23,16 @@ export const sendPasswordResetEmail = async (
     `,
   });
 };
+
+export const sendOtpEmail = async (to: string, otp: string): Promise<void> => {
+  await transporter.sendMail({
+    from: env.SMTP_FROM,
+    to,
+    subject: "Verify your email",
+    html: `
+      <p>Welcome! Use the code below to verify your email address.</p>
+      <p style="font-size: 28px; font-weight: bold; letter-spacing: 6px;">${otp}</p>
+      <p>This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>
+    `,
+  });
+};

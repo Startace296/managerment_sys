@@ -7,7 +7,35 @@ class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await authService.register(req.body);
-      sendSuccess(res, user, "User registered successfully", 201);
+      sendSuccess(
+        res,
+        user,
+        "Account created. Please check your email for a verification code.",
+        201
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      await authService.verifyOtp(email, otp);
+      sendSuccess(res, null, "Email verified successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resendOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      await authService.resendOtp(req.body.email);
+      sendSuccess(
+        res,
+        null,
+        "If the account exists and isn't verified yet, a new code has been sent"
+      );
     } catch (error) {
       next(error);
     }

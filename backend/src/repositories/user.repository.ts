@@ -27,6 +27,13 @@ export const userRepository = AppDataSource.getRepository(User).extend({
       .getOne();
   },
 
+  findByEmailWithOtp(email: string) {
+    return this.createQueryBuilder("user")
+      .addSelect(["user.otpCode", "user.otpExpires"])
+      .where("user.email = :email", { email })
+      .getOne();
+  },
+
   findByResetToken(hashedToken: string) {
     return this.createQueryBuilder("user")
       .addSelect(["user.resetPasswordToken", "user.resetPasswordExpires"])

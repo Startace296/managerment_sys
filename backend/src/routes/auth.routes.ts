@@ -9,11 +9,23 @@ import {
   changePasswordSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyOtpSchema,
+  resendOtpSchema,
 } from "../middlewares/schemas";
 
 const router = Router();
 
 router.post("/register", validate(registerSchema), authController.register);
+router.post(
+  "/verify-otp",
+  validate(verifyOtpSchema),
+  authController.verifyOtp
+);
+router.post(
+  "/resend-otp",
+  validate(resendOtpSchema),
+  authController.resendOtp
+);
 router.post("/login", validate(loginSchema), authController.login);
 router.post("/refresh", validate(refreshTokenSchema), authController.refreshToken);
 router.post("/logout", authenticate, authController.logout);

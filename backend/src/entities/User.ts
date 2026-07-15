@@ -41,6 +41,15 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ type: "varchar", nullable: true, length: 255, select: false })
+  otpCode: string | null;
+
+  @Column({ type: "datetime", nullable: true, select: false })
+  otpExpires: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
