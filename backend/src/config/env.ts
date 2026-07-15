@@ -11,6 +11,7 @@ export const env = {
   DB_NAME: process.env.DB_NAME || "management_db",
   DB_USER: process.env.DB_USER || "root",
   DB_PASSWORD: process.env.DB_PASSWORD || "",
+  DB_SSL: process.env.DB_SSL === "true",
 
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "access_secret_dev",
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "refresh_secret_dev",
