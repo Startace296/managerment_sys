@@ -11,6 +11,7 @@ export interface User {
   lastName: string;
   role: UserRole;
   isActive: boolean;
+  isEmailVerified: boolean;
   createdAt: string;
   updatedAt: string;
 }

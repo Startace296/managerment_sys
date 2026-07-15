@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import AuthPage from "./pages/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import VerifyOtpPage from "./pages/VerifyOtpPage";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/login" element={<LoginRoute />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route element={<Protected />}>
               <Route path="/" element={<Dashboard />} />
               <Route

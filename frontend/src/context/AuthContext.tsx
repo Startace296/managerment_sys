@@ -19,6 +19,8 @@ interface AuthContextValue {
     firstName: string;
     lastName: string;
   }) => Promise<User>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
   isManagerUp: boolean;
@@ -76,6 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const verifyOtp = useCallback(async (email: string, otp: string) => {
+    await api.post("/auth/verify-otp", { email, otp });
+  }, []);
+
+  const resendOtp = useCallback(async (email: string) => {
+    await api.post("/auth/resend-otp", { email });
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout");
@@ -93,6 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         booting,
         login,
         register,
+        verifyOtp,
+        resendOtp,
         logout,
         isAdmin: user?.role === "admin",
         isManagerUp: user?.role === "admin" || user?.role === "manager",

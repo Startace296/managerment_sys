@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
@@ -43,12 +44,17 @@ export default function AuthPage() {
         });
         push(
           "success",
-          `Account #${user.id} created (${user.email}) — role: ${ROLE_LABEL[user.role]}`
+          `Account #${user.id} created (${user.email}) — role: ${ROLE_LABEL[user.role]}. Check your email for a verification code.`
         );
-        setMode("login");
+        navigate(`/verify-otp?email=${encodeURIComponent(user.email)}`);
       }
     } catch (err) {
-      push("error", getApiError(err));
+      if (mode === "login" && axios.isAxiosError(err) && err.response?.status === 403) {
+        push("error", getApiError(err));
+        navigate(`/verify-otp?email=${encodeURIComponent(form.email)}`);
+      } else {
+        push("error", getApiError(err));
+      }
     } finally {
       setBusy(false);
     }
