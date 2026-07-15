@@ -1,3 +1,4 @@
+import { Between } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { Attendance } from "../entities/Attendance";
 import { AttendanceStatus } from "../types";
@@ -64,5 +65,16 @@ export const attendanceRepository = AppDataSource.getRepository(
       .where("employee.id = :employeeId", { employeeId })
       .andWhere("attendance.workDate = :workDate", { workDate })
       .getOne();
+  },
+
+  // from/to are inclusive "YYYY-MM-DD" bounds, e.g. the first/last day of a
+  // payroll month.
+  findByEmployeeAndDateRange(employeeId: number, from: string, to: string) {
+    return this.find({
+      where: {
+        employee: { id: employeeId },
+        workDate: Between(from, to),
+      },
+    });
   },
 });

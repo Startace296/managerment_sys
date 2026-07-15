@@ -31,6 +31,12 @@ export enum LeaveStatus {
   CANCELLED = "cancelled",
 }
 
+export enum PayrollStatus {
+  DRAFT = "draft",
+  APPROVED = "approved",
+  PAID = "paid",
+}
+
 export interface JwtPayload {
   userId: number;
   email: string;

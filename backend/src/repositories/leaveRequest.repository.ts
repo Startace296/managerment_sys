@@ -76,4 +76,19 @@ export const leaveRequestRepository = AppDataSource.getRepository(
       ],
     });
   },
+
+  // Approved leave requests that overlap the ["from", "to"] range at all
+  // (a request may start/end outside the range, e.g. straddling two payroll
+  // months) — the caller is responsible for clipping to the range.
+  findApprovedOverlapping(employeeId: number, from: string, to: string) {
+    return this.createQueryBuilder("leaveRequest")
+      .leftJoin("leaveRequest.employee", "employee")
+      .where("employee.id = :employeeId", { employeeId })
+      .andWhere("leaveRequest.status = :status", {
+        status: LeaveStatus.APPROVED,
+      })
+      .andWhere("leaveRequest.startDate <= :to", { to })
+      .andWhere("leaveRequest.endDate >= :from", { from })
+      .getMany();
+  },
 });

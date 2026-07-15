@@ -53,4 +53,8 @@ export const employeeRepository = AppDataSource.getRepository(Employee).extend({
       .where("user.id = :userId", { userId })
       .getOne();
   },
+
+  findAllActive() {
+    return this.find({ where: { status: EmployeeStatus.ACTIVE } });
+  },
 });

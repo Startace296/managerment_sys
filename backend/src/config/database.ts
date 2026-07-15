@@ -6,6 +6,7 @@ import { Department } from "../entities/Department";
 import { Employee } from "../entities/Employee";
 import { Attendance } from "../entities/Attendance";
 import { LeaveRequest } from "../entities/LeaveRequest";
+import { Payroll } from "../entities/Payroll";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -17,7 +18,7 @@ export const AppDataSource = new DataSource({
   ssl: env.DB_SSL ? { minVersion: "TLSv1.2", rejectUnauthorized: true } : undefined,
   synchronize: env.NODE_ENV === "development",
   logging: env.NODE_ENV === "development",
-  entities: [User, Department, Employee, Attendance, LeaveRequest],
+  entities: [User, Department, Employee, Attendance, LeaveRequest, Payroll],
   migrations: [],
 });
 

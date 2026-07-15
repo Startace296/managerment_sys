@@ -5,6 +5,7 @@ import {
   AttendanceStatus,
   LeaveType,
   LeaveStatus,
+  PayrollStatus,
 } from "../types";
 
 export const registerSchema = z.object({
@@ -140,4 +141,17 @@ export const leaveRequestQuerySchema = paginationSchema.extend({
   leaveType: z.nativeEnum(LeaveType).optional(),
   from: isoDate.optional(),
   to: isoDate.optional(),
+});
+
+export const generatePayrollSchema = z.object({
+  month: z.number().int().min(1).max(12),
+  year: z.number().int().min(2000).max(2100),
+});
+
+export const payrollQuerySchema = paginationSchema.extend({
+  employeeId: z.coerce.number().int().positive().optional(),
+  departmentId: z.coerce.number().int().positive().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  status: z.nativeEnum(PayrollStatus).optional(),
 });
