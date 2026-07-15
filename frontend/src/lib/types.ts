@@ -3,6 +3,7 @@ export type EmployeeStatus = "active" | "inactive" | "on_leave";
 export type AttendanceStatus = "present" | "late";
 export type LeaveType = "annual" | "sick" | "unpaid" | "other";
 export type LeaveStatus = "pending" | "approved" | "rejected" | "cancelled";
+export type PayrollStatus = "draft" | "approved" | "paid";
 
 export interface User {
   id: number;
@@ -82,6 +83,25 @@ export interface LeaveRequest {
   employee?: Employee;
 }
 
+export interface Payroll {
+  id: number;
+  month: number;
+  year: number;
+  baseSalary: string | number;
+  standardWorkDays: number;
+  actualWorkDays: number;
+  paidLeaveDays: number;
+  unpaidLeaveDays: number;
+  overtimeMinutes: number;
+  overtimePay: string | number;
+  deductions: string | number;
+  netSalary: string | number;
+  status: PayrollStatus;
+  createdAt: string;
+  updatedAt: string;
+  employee?: Employee;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -146,6 +166,27 @@ export const LEAVE_STATUS_LABEL: Record<LeaveStatus, string> = {
   rejected: "Rejected",
   cancelled: "Cancelled",
 };
+
+export const PAYROLL_STATUS_LABEL: Record<PayrollStatus, string> = {
+  draft: "Draft",
+  approved: "Approved",
+  paid: "Paid",
+};
+
+export const MONTH_LABEL = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 export const formatVnd = (v: string | number) =>
   new Intl.NumberFormat("en-US", {

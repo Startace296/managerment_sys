@@ -35,6 +35,13 @@ const NAV = [
     ),
   },
   {
+    to: "/payroll",
+    label: "Payroll",
+    icon: (
+      <path d="M4 4h16a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1zm2 4v2h2V8H6zm0 4v2h2v-2H6zm4-4v2h8V8h-8zm0 4v2h8v-2h-8z" />
+    ),
+  },
+  {
     to: "/departments",
     label: "Departments",
     icon: <path d="M4 21V7l8-4 8 4v14h-6v-5h-4v5H4zm5-9h2V9H9v3zm4 0h2V9h-2v3z" />,
